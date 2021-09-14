@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "meetup",
+    "slug": "meetup",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "plugins": [
+      "expo-image-picker"
+    ]
+  },
+  "name": "meetup"
+}
