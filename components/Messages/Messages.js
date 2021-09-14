@@ -89,7 +89,6 @@ const Messages = ({ route }) => {
 				setSelectedChat(chat);
 
 			} else if (data.chats[0] && !selectedChat) {
-				console.log('here2')
 				setSelectedChat(data.chats[0]);
 			}
 
@@ -189,9 +188,10 @@ const Messages = ({ route }) => {
 						</Flex>
 					</ScrollView>
 
-					<Flex h={'15%'} w={'100%'} pt={1} direction='column' backgroundColor={'#fa8797'}>
-						{
-							selectedChat && 
+					{
+						selectedChat &&
+						<Flex h={'15%'} w={'100%'} pt={1} direction='column' backgroundColor={'#fa8797'}>
+						
 							<Flex direction='column' w={'100%'}>
 								<Flex direction='row' width={'100%'} px={2}>
 									<Box w={'70%'}>
@@ -212,34 +212,36 @@ const Messages = ({ route }) => {
 									</Text>
 								</Box>
 							</Flex>
-						}
+							
 
-						<Flex direction='row' w={'100%'}>
-							<Button
-								backgroundColor='#fff'
-								my={'auto'}
-								mx={'auto'}
-								w={'45%'}
-								h={'40%'}
-								shadow={4}
-								onPress={() => setCloseChatDialog(true)}
-							>
-								<Text textAlign='center' color='#fa8797' bold>Close chat</Text>
-							</Button>
-						
-							<Button
-								backgroundColor='#fff'
-								my={'auto'}
-								mx={'auto'}
-								w={'50%'}
-								h={'45%'}
-								shadow={4}
-								onPress={() => setConfirmDialog(true)}
-							>
-								<Text textAlign='center' color='#fa8797' bold>Confirm Attendance</Text>
-							</Button>
+							<Flex direction='row' w={'100%'}>
+								<Button
+									backgroundColor='#fff'
+									my={'auto'}
+									mx={'auto'}
+									w={'45%'}
+									h={'40%'}
+									shadow={4}
+									onPress={() => setCloseChatDialog(true)}
+								>
+									<Text textAlign='center' color='#fa8797' bold>Close chat</Text>
+								</Button>
+							
+								<Button
+									backgroundColor='#fff'
+									my={'auto'}
+									mx={'auto'}
+									w={'50%'}
+									h={'45%'}
+									shadow={4}
+									onPress={() => setConfirmDialog(true)}
+									disabled={selectedChat.event[0].acceptedUuids.includes(userUuid)}
+								>
+									<Text textAlign='center' color='#fa8797' bold>Confirm Attendance</Text>
+								</Button>
+							</Flex>
 						</Flex>
-					</Flex>
+					}
 
 
 					{
@@ -258,7 +260,10 @@ const Messages = ({ route }) => {
 			}
 
 			<CloseChat isOpen={closeChatDialog} setIsOpen={setCloseChatDialog}/>
-			<ConfirmAttendance isOpen={confirmDialog} setIsOpen={setConfirmDialog}/>
+			{
+				selectedChat &&
+				<ConfirmAttendance isOpen={confirmDialog} setIsOpen={setConfirmDialog} eventUuid={selectedChat.eventUuid} fetchChats={fetchChats}/>
+			}
 		
 		</Box>
 	)
