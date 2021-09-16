@@ -7,13 +7,17 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import dateFormat from 'dateformat'
 import GoogleStaticMap from 'react-native-google-static-map'
+import DeleteEvent from '../MyEvents/DeleteEvent';
 
 import env from "../../config/env";
 
 
-const SingleEvent = ({ event, navigation, discoverScreen }) => {
+const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchMyEventsData }) => {
 
 	const [currentUserUuid, setCurrentUserUuid] = useState('');
+	const [hidden, setHidden] = useState(event.hidden);
+	const [deleted, setDeleted] = useState(event.deleted);
+	const [deleteModal, setDeleteModal] = useState(false);
 
 	useEffect(() => {
 		setCurrentUser();
@@ -39,7 +43,7 @@ const SingleEvent = ({ event, navigation, discoverScreen }) => {
 				},
 				{
 					headers: {
-						Authorization: `Bearer ${token}`
+						authorization: `Bearer ${token}`
 					}
 				}
 			)
@@ -52,6 +56,35 @@ const SingleEvent = ({ event, navigation, discoverScreen }) => {
 			console.log(error);
 		}
 	} 
+
+	const toggleHideEvent = async() => {
+		try {
+
+			const token = await SecureStore.getItemAsync('accessToken');
+		
+			await axios.put(`${env.API_URL}:3000/api/myevents/hide/${event.uuid}`, 
+				{},
+				{
+					headers: {
+						authorization: `Bearer ${token}`
+					}
+				}
+			)
+
+			setHidden(!hidden)
+
+		} catch(error) {
+			console.log(error)
+		}
+	}
+
+	const editEvent = async () => {
+		try {
+
+		} catch(error){
+			console.log(error)
+		}
+	}
 
 
 
@@ -117,9 +150,6 @@ const SingleEvent = ({ event, navigation, discoverScreen }) => {
 						</Center>
 					</Flex>
 					<Flex direction='row' mt={2}>
-						{/* <Box>
-							<Text>Activity: </Text>
-						</Box> */}
 						<Box 
 							backgroundColor='#fb7185'
 							px={2}
@@ -131,6 +161,51 @@ const SingleEvent = ({ event, navigation, discoverScreen }) => {
 								fontWeight='bold'
 							>{event.name}</Text>
 						</Box>
+						{
+							myEventsScreen === 'created' &&
+							<Box pl={2}>
+								{
+									hidden ?
+									<Flex direction='row' align='center' justify='center'>
+										<Ionicons color='grey' size={13} name='eye-off-outline' />
+										<Text h={5} ml={1} fontSize={13} color='grey'>hidden</Text>
+									</Flex>:
+									<Flex direction='row' align='center' justify='center'>
+										<Box mt={1}>
+											<Ionicons color='grey' size={13} name='eye-outline' />
+										</Box>
+										<Text ml={1} fontSize={13} color='grey'>visible</Text>
+									</Flex>
+								}
+							</Box>
+						}
+						<Spacer />
+
+						{
+							new Date(event.date) > new Date() ?
+							<Box 
+								backgroundColor='#16a34a'
+								px={2}
+								pb={1}
+								borderRadius={20}
+							>
+								<Text 
+									color='#fff' 
+									fontWeight='bold'
+								>Active</Text>
+							</Box>:
+							<Box 
+								backgroundColor='#991b1b'
+								px={2}
+								pb={1}
+								borderRadius={20}
+							>
+								<Text 
+									color='#fff' 
+									fontWeight='bold'
+								>Expired</Text>
+							</Box>
+						}
 					</Flex>
 				</Box>
 				
@@ -143,6 +218,7 @@ const SingleEvent = ({ event, navigation, discoverScreen }) => {
 				borderRadius={10}
 			>
 				<Flex 
+					direction='row'
 				>
 					<Box>
 						<Text 
@@ -152,10 +228,25 @@ const SingleEvent = ({ event, navigation, discoverScreen }) => {
 						>
 							Description
 						</Text>
-					</Box>
-					<Box>
 						<Text color='#fff' fontSize={12}>
 							{event.description}
+						</Text>
+					</Box>
+					<Spacer />
+					<Box>
+						<Text
+							color="#fff"
+							bold
+							fontSize={13}
+						>
+							{event.accepted.length} attending
+						</Text>
+						<Text
+							color="#fff"
+							bold
+							fontSize={13}
+						>
+							{event.currentlyMessaging.length} currently messaging
 						</Text>
 					</Box>
 				</Flex>
@@ -198,8 +289,121 @@ const SingleEvent = ({ event, navigation, discoverScreen }) => {
 							>Send { event.createdBy.firstName } a message.</Text>
 						</Button>
 					}
+					{
+						myEventsScreen === 'attended' &&
+						<Flex direction='row'>	
+							<Button
+								backgroundColor='#fff'
+								h={8}
+								w={'48%'}
+								borderRadius={20}
+								shadow={4}
+								isDisabled={event.createdBy.uuid === currentUserUuid }
+								onPress={() => handleSendMessage()}
+							>
+								<Text
+									color='#fb7185'
+									bold
+									onPress={() => handleSendMessage()}
+									fontSize={15}
+								>
+									Withdraw attendance
+								</Text>
+							</Button>
+							<Spacer />
+							<Button
+								backgroundColor='#fff'
+								h={8}
+								w={'48%'}
+								borderRadius={20}
+								shadow={4}
+								isDisabled={event.createdBy.uuid === currentUserUuid }
+								onPress={() => handleSendMessage()}
+							>
+								<Text
+									color='#fb7185'
+									bold
+								>
+									Go to messages
+								</Text>
+							</Button>
+						</Flex>
+					}
+
+					{
+						myEventsScreen === 'created' &&
+						<Flex direction='row'>	
+							<Button
+								backgroundColor='#fff'
+								h={8}
+								w={'32%'}
+								borderRadius={20}
+								shadow={4}
+								onPress={() => toggleHideEvent()}
+							>
+								{
+									hidden ? 
+									<Text
+										color='#fb7185'
+										bold
+										fontSize={14}
+									>
+										Show Event
+									</Text>:
+									<Text
+										color='#fb7185'
+										bold
+										fontSize={14}
+									>
+										Hide Event
+									</Text>
+								}
+							</Button>
+							<Spacer />
+							<Button
+								backgroundColor='#fff'
+								h={8}
+								w={'32%'}
+								borderRadius={20}
+								shadow={4}
+								onPress={() => setDeleteModal(true)}
+							>
+								<Text
+									color='#fb7185'
+									bold
+									fontSize={14}
+								>
+									Delete Event
+								</Text>
+							</Button>
+							<Spacer />
+							<Button
+								backgroundColor='#fff'
+								h={8}
+								w={'32%'}
+								borderRadius={20}
+								shadow={4}
+								onPress={() => editEvent()}
+							>
+								<Text
+									color='#fb7185'
+									bold
+									fontSize={14}
+								>
+									Edit Event
+								</Text>
+							</Button>
+						</Flex>
+					}
+					
 				</Flex>
 			</Flex>
+
+
+			{
+				deleteModal &&
+				<DeleteEvent setIsOpen={setDeleteModal} isOpen={deleteModal} event={event} setDeleted={setDeleted} fetchMyEventsData={fetchMyEventsData}/>
+			}
 		</Flex>
 	)
 }

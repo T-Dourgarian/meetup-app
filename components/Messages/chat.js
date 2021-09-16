@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState, useRef } from 'react';
-import { View } from 'react-native';
+import { View, RefreshControl } from 'react-native';
 import axios from 'axios';
 import { List, Box, Button, Input, Flex, ScrollView, Text } from 'native-base';
 import * as SecureStore from 'expo-secure-store';
@@ -19,7 +19,7 @@ const usePreviousValue = value => {
 	return ref.current;
   };
 
-const Chat = ({ chatUuid, eventUuid, selectedChat }) => {
+const Chat = ({ chatUuid, eventUuid, selectedChat, fetchChats }) => {
 
 
 
@@ -27,6 +27,20 @@ const Chat = ({ chatUuid, eventUuid, selectedChat }) => {
 	const [currentUserUuid, setCurrentUserUuid] = useState('');
 	const scrollViewRef = useRef();
 
+
+	const [refreshing, setRefreshing] = useState(false);
+
+	const onRefresh = React.useCallback(() => {
+		setRefreshing(true);
+		wait(200).then(() => {
+			setRefreshing(false);
+			fetchChats(); 
+		});
+	}, []);
+
+	const wait = (timeout) => {
+		return new Promise(resolve => setTimeout(resolve, timeout));
+	}
 	
 
 	const prevChatUuid = usePreviousValue(chatUuid);
@@ -66,6 +80,12 @@ const Chat = ({ chatUuid, eventUuid, selectedChat }) => {
 			<ScrollView h={10}
 				ref={scrollViewRef}
 				onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: false })}
+				refreshControl={
+					<RefreshControl
+						refreshing={refreshing}
+						onRefresh={onRefresh}
+					/>
+				}
 			>
 				{
 					selectedChat && selectedChat.messages[0] &&

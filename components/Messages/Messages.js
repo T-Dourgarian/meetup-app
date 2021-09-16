@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useState, useRef } from 'react';
 import { View } from 'react-native';
 import axios from 'axios';
-import { List, Box, Button, Input, ScrollView, Stack, Avatar, Center, Flex, Text, Image, Modal } from 'native-base';
+import { List, Box, Button, Input, ScrollView, Stack, Avatar, Center, Flex, Text, Image, Modal, Spinner } from 'native-base';
 import * as SecureStore from 'expo-secure-store';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import io from 'socket.io-client';
@@ -27,8 +27,7 @@ const Messages = ({ route }) => {
 	const [confirmDialog, setConfirmDialog] = useState(false);
 	const currentChats = useRef(chats);
 	const currentSelectedChat = useRef(selectedChat)
-
-	
+	const [spinner, setSpinner] = useState(false);
 
 	useEffect(() => {
         // This effect executes on every render (no dependency array specified).
@@ -46,8 +45,6 @@ const Messages = ({ route }) => {
 
 		socket.on('message', (newMessage) => {
 			let newChats = [];
-
-			console.log(currentChats.current);
 
 			for (let chat of currentChats.current) {
 				if (chat.uuid === currentSelectedChat.current.uuid) {
@@ -68,8 +65,17 @@ const Messages = ({ route }) => {
 		setUserUuid( await SecureStore.getItemAsync('uuid'));
 	}
 
+	useEffect( () => {
+		if (route.params && route.params.chatUuid) {
+			fetchChats()
+		}
+	}, [route.params])
+
 	const fetchChats = async () => {
 		try {
+
+			setSpinner(true);
+
 			const token = await SecureStore.getItemAsync('accessToken');
 
 			const { data } = await axios.get(`${env.API_URL}:3000/api/chat`,
@@ -92,7 +98,10 @@ const Messages = ({ route }) => {
 				setSelectedChat(data.chats[0]);
 			}
 
+			setSpinner(false);
+
 		} catch (error) {
+			setSpinner(false);
 			console.log(error)
 		}
 	}
@@ -155,41 +164,46 @@ const Messages = ({ route }) => {
 
 
 	return (
-		<Box backgroundColor='#fff'>
+		<>
 			{
-				chats[0] ?
-				<Flex h={'100%'}>
-					<ScrollView 
-						horizontal={true}
-						h={'17%'}
-						backgroundColor={'#fa8797'}
-						borderBottomColor='#fff'
-						borderBottomWidth={2}
-					>
-						<Flex direction='row'>
-							{
-								chats.map(chat => (
-									<Button 
-										key={chat.uuid} 
-										onPress={() =>  setSelectedChat(chat)} 
-										variant='unstyled'
-										py={2}
-									>
-										<Flex>
-											
-											<ProfileBubble ppURL={chat.event[0].createdBy.ppURL} chatUuid={chat.uuid}/>
-											
-											<BubbleLabel chatUsers={chat.users} />
-											
-										</Flex>
-									</Button>
-								))
-							}
-						</Flex>
-					</ScrollView>
+				spinner ? 
+				<Center flex={1}>
+					<Spinner size='large' color='#f43f5e' />
+				</Center> :
+				<Box backgroundColor='#fff'>
+				{
+					chats[0] && selectedChat ?
+					<Flex h={'100%'}>
+						<ScrollView 
+							horizontal={true}
+							h={'17%'}
+							backgroundColor={'#fa8797'}
+							borderBottomColor='#fff'
+							borderBottomWidth={2}
+						>
+							<Flex direction='row'>
+								{
+									chats.map(chat => (
+										<Button 
+											key={chat.uuid} 
+											onPress={() =>  setSelectedChat(chat)} 
+											variant='unstyled'
+											py={2}
+										>
+											<Flex>
+												
+												<ProfileBubble ppURL={chat.event[0].createdBy.ppURL} chatUuid={chat.uuid}/>
+												
+												<BubbleLabel chatUsers={chat.users} />
+												
+											</Flex>
+										</Button>
+									))
+								}
+							</Flex>
+						</ScrollView>
 
-					{
-						selectedChat &&
+						
 						<Flex h={'15%'} w={'100%'} pt={1} direction='column' backgroundColor={'#fa8797'}>
 						
 							<Flex direction='column' w={'100%'}>
@@ -235,37 +249,40 @@ const Messages = ({ route }) => {
 									h={'45%'}
 									shadow={4}
 									onPress={() => setConfirmDialog(true)}
-									disabled={selectedChat.event[0].acceptedUuids.includes(userUuid)}
+									disabled={selectedChat.event[0].acceptedUuids.includes(userUuid) || selectedChat.event[0].deleted}
 								>
 									<Text textAlign='center' color='#fa8797' bold>Confirm Attendance</Text>
 								</Button>
+								<Text>{selectedChat.deleted}</Text>
 							</Flex>
 						</Flex>
-					}
 
 
-					{
-						selectedChat && 
-						<Chat chatUuid={selectedChat.uuid} selectedChat={selectedChat} eventUuid={selectedChat.eventUuid} />
-					}
-				</Flex>:
+						{
+							!selectedChat.event[0].deleted ?
+							<Chat chatUuid={selectedChat.uuid} selectedChat={selectedChat} eventUuid={selectedChat.eventUuid} fetchChats={fetchChats} />:
+							<Center h={'68%'}>
+								<Text>This event has been deleted by the creator.</Text>
+							</Center>
+						}
 
-				<Flex h={'100%'}>
-					<Box h={'100%'}>
-						<Text>
-							You don't have any active chats! Send someone a message on the discover page to create a new chat!
-						</Text>
-					</Box>
-				</Flex>
+
+
+						<CloseChat isOpen={closeChatDialog} setIsOpen={setCloseChatDialog} chatUuid={selectedChat.uuid} fetchChats={fetchChats}/>
+						<ConfirmAttendance isOpen={confirmDialog} setIsOpen={setConfirmDialog} eventUuid={selectedChat.eventUuid} fetchChats={fetchChats}/>
+					</Flex>:
+
+					<Flex h={'100%'}>
+						<Box h={'100%'}>
+							<Text>
+								You don't have any active chats! Send someone a message on the discover page to create a new chat!
+							</Text>
+						</Box>
+					</Flex>
+				}			
+			</Box>
 			}
-
-			<CloseChat isOpen={closeChatDialog} setIsOpen={setCloseChatDialog}/>
-			{
-				selectedChat &&
-				<ConfirmAttendance isOpen={confirmDialog} setIsOpen={setConfirmDialog} eventUuid={selectedChat.eventUuid} fetchChats={fetchChats}/>
-			}
-		
-		</Box>
+		</>
 	)
 };
 

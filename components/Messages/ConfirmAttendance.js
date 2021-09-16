@@ -11,37 +11,40 @@ import moment from 'moment'
 
 import socket from '../../config/socket';
 
-const ConfirmAttendance = ( {isOpen, setIsOpen, eventUuid, fetchChats}) => {
+const ConfirmAttendance = ({ isOpen, setIsOpen, eventUuid, fetchChats }) => {
 
 	const [spinner, setSpinner] = useState(false);
+	const mountedRef = useRef(true);
+
+	useEffect(() => {
+		return () => { 
+		  mountedRef.current = false
+		}
+	}, [])
 
 	const handleConfirm = async() => {
 		try {
-			
-			setSpinner(true);
+				setSpinner(true);
 
-			const token = await SecureStore.getItemAsync('accessToken');
+				const token = await SecureStore.getItemAsync('accessToken');
 
-			console.log(`${env.API_URL}:3000/api/event/accept/${eventUuid}`)
+				await axios.put(`${env.API_URL}:3000/api/event/accept/${eventUuid}`, {},
+				{
+					headers: {
+						'Authorization': `Bearer ${token}`
+					}
+				})
+					
+				setSpinner(false)
+				setIsOpen(false);
 
-			const { data } = await axios.put(`${env.API_URL}:3000/api/event/accept/${eventUuid}`, {},
-			{
-				headers: {
-					'Authorization': `Bearer ${token}`
-				}
-			});
-
-
-			fetchChats();			
-
-			setSpinner(false)
-			setIsOpen(false);
-			
-
+				fetchChats();
 
 		} catch(error) {
-			setSpinner(false);
-			setIsOpen(false);
+			if (!mountedRef.current) {
+				setSpinner(false)
+				setIsOpen(false);
+			}
 			console.log(error);
 		}
 	}
