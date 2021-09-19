@@ -28,7 +28,8 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 	},[])
 
 	const setCurrentUser = async () => {
-		setCurrentUserUuid( await SecureStore.getItemAsync('uuid'))
+		const uuid =  await SecureStore.getItemAsync('uuid')
+		setCurrentUserUuid(uuid)
 	}
 
 

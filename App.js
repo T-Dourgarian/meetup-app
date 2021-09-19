@@ -7,18 +7,25 @@ import Navigation from './components/Navigation';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import configureStore from './redux/store';
+import { Provider } from 'react-redux';
+
+const store = configureStore();
+
 
 
 
 export default function App() {
 	
   return (
-	  <SafeAreaProvider >
-		  <NativeBaseProvider >
-			<Navigation >
-			</Navigation>
-		</NativeBaseProvider>
-	  </SafeAreaProvider>
+	  <Provider store={store}>
+			<SafeAreaProvider >
+				<NativeBaseProvider >
+						<Navigation >
+						</Navigation>
+				</NativeBaseProvider>
+			</SafeAreaProvider>
+		</Provider>
   );
 }
 

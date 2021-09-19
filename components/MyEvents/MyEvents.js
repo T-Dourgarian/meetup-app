@@ -12,7 +12,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import socket from '../../config/socket';
 import SingleEvent from '../Discover/SingleEvent';
 
-const MyEvents = ({ navigation }) => {
+const MyEvents = ({ navigation, route }) => {
 
 	const [filter, setFilter] = useState('created')
 	const [events, setEvents] = useState([])
@@ -33,7 +33,6 @@ const MyEvents = ({ navigation }) => {
 	  setRefreshing(true);
 	  wait(200).then(() => {
 		  setRefreshing(false);
-		  console.log(currentFilter.current)
 		  fetchData(currentFilter.current); 
 	  });
 	}, []);
@@ -67,7 +66,14 @@ const MyEvents = ({ navigation }) => {
 
 	useEffect(() => {
 		fetchData(filter);
-	}, [])
+	}, [filter])
+
+
+	useEffect(() => {
+		if (route.params && route.params.filter) {
+			setFilter(route.params.filter);
+		}
+	}, [route.params])
 
 
 	const handleFilterChange = (newFilter) => {
@@ -112,23 +118,37 @@ const MyEvents = ({ navigation }) => {
 				<Center flex={1}>
 					<Spinner color='#fb7185'/>
 				</Center>:
-				<ScrollView h='92%'
-					refreshControl={
-						<RefreshControl
-							refreshing={refreshing}
-							onRefresh={onRefresh}
-						/>
+				<>
+					{
+						events && events[0] ?
+						<ScrollView h='92%'
+							refreshControl={
+								<RefreshControl
+									refreshing={refreshing}
+									onRefresh={onRefresh}
+								/>
+							}
+						>
+							{
+								events.map(event => 
+									(
+										<SingleEvent key={event.uuid} navigation={navigation} event={event} myEventsScreen={filter} fetchMyEventsData={fetchData}/>
+									)
+								)
+							}
+						</ScrollView>:
+							<Center w={'100%'}>
+								<Text my={3} color='#a8a29e' fontSize={13} textAlign='center' w={'75%'}>
+									{
+										filter ==='created'? 
+										'You haven"t created any events yet. Navigate to the Create page to create your first event!':
+										'You have no past or currently scheduled events. Navigate to the Discover page to find events!'
+									}
+								</Text>
+							</Center>
+
 					}
-				>
-				{
-					events && events[0] && 
-					events.map(event => 
-						(
-							<SingleEvent key={event.uuid} navigation={navigation} event={event} myEventsScreen={filter} fetchMyEventsData={fetchData}/>
-						)
-					)
-				}
-			</ScrollView>
+				</>
 			}
 
 		</Box>

@@ -1,31 +1,30 @@
 import * as React from 'react';
 import { useEffect, useState, useRef } from 'react';
 import { View, RefreshControl } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
-import { List, Box, Button, Input, Flex, ScrollView, Text } from 'native-base';
+import { List, Box, Button, Input, Flex, ScrollView, Text, Center } from 'native-base';
 import * as SecureStore from 'expo-secure-store';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import io from 'socket.io-client';
 import env from "../../config/env";
 import moment from 'moment'
+import { addMessage, setChats } from '../../redux/actions/chat';
 
 import socket from '../../config/socket';
 
-const usePreviousValue = value => {
-	const ref = useRef();
-	useEffect(() => {
-	  ref.current = value;
-	});
-	return ref.current;
-  };
+const Chat = ({ route }) => {
 
-const Chat = ({ chatUuid, eventUuid, selectedChat, fetchChats }) => {
-
-
-
+	const [ chatUuid ] = useState(route.params.uuid);
+	const [ eventUuid ] = useState(route.params.event[0].uuid);
+	const [messages, setMessages] = useState(route.params.messages);
 	const [text, setText] = useState('');
 	const [currentUserUuid, setCurrentUserUuid] = useState('');
+	const [otherChatUser, setOtherChatUser] = useState('');
 	const scrollViewRef = useRef();
+	const currentMessages = useRef(messages);
+
+	const dispatch = useDispatch();
 
 
 	const [refreshing, setRefreshing] = useState(false);
@@ -43,26 +42,49 @@ const Chat = ({ chatUuid, eventUuid, selectedChat, fetchChats }) => {
 	}
 	
 
-	const prevChatUuid = usePreviousValue(chatUuid);
 
 	useEffect( () => {
 		setCurrentUser();
 	},[])
 
-	
 
+	useEffect(() => {
+        // This effect executes on every render (no dependency array specified).
+        // Any change to the "participants" state will trigger a re-render
+        // which will then cause this effect to capture the current "participants"
+        // value in "participantsRef.current".
+		currentMessages.current = messages; 
+    });
 
 	useEffect(() => {
 
-		socket.emit('leaveChatRoom', prevChatUuid);
-
 		socket.emit('joinChatRoom', chatUuid);
 
-	},[chatUuid]);
+
+		socket.on('message', (newMessage) => {
+			const newMessages = [...currentMessages.current, newMessage];
+
+			dispatch(addMessage(newMessage))
+
+			setMessages(newMessages);
+
+		});
+
+		return () => {
+			socket.emit('leaveChatRoom', chatUuid);
+			socket.off('message')
+		}
+	},[]);
 
 
 	const setCurrentUser = async () => {
-		setCurrentUserUuid( await SecureStore.getItemAsync('uuid'))
+		const uuid = await SecureStore.getItemAsync('uuid')
+		setCurrentUserUuid(uuid);
+
+		const otherUser = route.params.users.find(user => user.uuid !== uuid)
+
+		setOtherChatUser(otherUser)
+
 	}
 
 	
@@ -76,20 +98,17 @@ const Chat = ({ chatUuid, eventUuid, selectedChat, fetchChats }) => {
 
 
 	return (
-		<Box h={'68%'}>
+		<Box h={'100%'} backgroundColor='#fff'>
+			<Center>
+				<Text fontSize={12} color='#a8a29e' w={'60%'} textAlign='center' pt={1} pb={3}> This is the beginning of your conversation with {otherChatUser.firstName} {otherChatUser.lastName} </Text>
+			</Center>
 			<ScrollView h={10}
 				ref={scrollViewRef}
-				onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: false })}
-				refreshControl={
-					<RefreshControl
-						refreshing={refreshing}
-						onRefresh={onRefresh}
-					/>
-				}
+				onContentSizeChange={(width,height) => scrollViewRef.current.scrollTo({y:height})}
 			>
 				{
-					selectedChat && selectedChat.messages[0] &&
-					selectedChat.messages.map(message => {
+					messages && messages[0] &&
+					messages.map(message => {
 						if (message.from.uuid === currentUserUuid) {
 							return (
 								<Box 
@@ -154,6 +173,7 @@ const Chat = ({ chatUuid, eventUuid, selectedChat, fetchChats }) => {
 							)
 						}
 					})
+
 				}
 			</ScrollView>
 			<Input 

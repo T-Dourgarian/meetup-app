@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState, useRef } from 'react';
+import { useDispatch } from 'react-redux'
 import { View } from 'react-native';
 import axios from 'axios';
 import { List, Box, Button, Input, Flex, ScrollView, Text, Modal, Spinner } from 'native-base';
@@ -8,11 +9,16 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import io from 'socket.io-client';
 import env from "../../config/env";
 import moment from 'moment'
+import { useNavigation } from '@react-navigation/native';
+import { addMessage, setChats } from '../../redux/actions/chat';
 
 import socket from '../../config/socket';
 
-const ConfirmAttendance = ({ isOpen, setIsOpen, eventUuid, fetchChats }) => {
+const ConfirmAttendance = ({ isOpen, setIsOpen, eventUuid }) => {
 
+	const navigation = useNavigation()
+
+	const dispatch = useDispatch();
 	const [spinner, setSpinner] = useState(false);
 	const mountedRef = useRef(true);
 
@@ -34,11 +40,22 @@ const ConfirmAttendance = ({ isOpen, setIsOpen, eventUuid, fetchChats }) => {
 						'Authorization': `Bearer ${token}`
 					}
 				})
-					
+		
+
+				const { data } = await axios.get(`${env.API_URL}:3000/api/chat`,
+					{
+						headers: {
+							'Authorization': `Bearer ${token}`
+						}
+					}
+				)
+	
+				dispatch(setChats(data.chats));
+
+				navigation.navigate('MyEvents', { filter: 'attended' })
+
 				setSpinner(false)
 				setIsOpen(false);
-
-				fetchChats();
 
 		} catch(error) {
 			if (!mountedRef.current) {

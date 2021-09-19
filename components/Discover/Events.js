@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { View, RefreshControl } from 'react-native';
 import axios from 'axios';
 import { List, Box, Button,Text, ScrollView, Input, Spinner, Center } from 'native-base';
@@ -22,6 +22,15 @@ function Event({ navigation }) {
 	const [search, setSearch] = useState(() => '')
 	const [spinner, setSpinner] = useState(false);
 	const [refreshing, setRefreshing] = useState(false)
+	const [unmounted, setUnmounted] = useState(false);
+
+	const mountedRef = useRef(true);
+
+	useEffect(() => {
+		return () => { 
+		  mountedRef.current = false
+		}
+	}, [])
 
 	const onRefresh = React.useCallback(() => {
 		setRefreshing(true);
@@ -51,10 +60,12 @@ function Event({ navigation }) {
 				},
 			);
 
-			setEvents(data.events);
+			if (mountedRef.current) {
+				setSpinner(false)
+				
+				setEvents(data.events);
 
-			setSpinner(false)
-
+			}
 		} catch(error) {
 			console.log(error)
 		}
@@ -63,7 +74,10 @@ function Event({ navigation }) {
 	useEffect( () => {
 		 
 		fetchData();
-		return setEvents([])
+		return () => {
+			setEvents([]);
+			setUnmounted(true);
+		}
 	}, [])
 
 	

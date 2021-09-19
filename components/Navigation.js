@@ -4,9 +4,10 @@ import { View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Box, Button, HStack, Stack as Stack2, Center, Text } from 'native-base';
+import { Box, Button, HStack, Stack as Stack2, Center, Text, Flex, Spacer, Divider } from 'native-base';
 import * as SecureStore from 'expo-secure-store';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import dateFormat from 'dateformat'
 
 // navigation component import
 import Discover from './Discover/Discover';
@@ -15,12 +16,17 @@ import Signup from './Login/Signup';
 import Messages from './Messages/Messages';
 import Profile from './Profile/Profile';
 import MyEvents from './MyEvents/MyEvents';
+import Chat from './Messages/Chat';
+import ChatHeader from './Messages/ChatHeader';
+import MessagesHeader from './Messages/MessagesHeader';
 
 import CreateEvent from './Create/CreateEvent';
 
 import socket from '../config/socket';
 
 const Stack = createNativeStackNavigator();
+
+const MessagesStack = createNativeStackNavigator();
 
 
 
@@ -29,12 +35,18 @@ const Tab = createBottomTabNavigator();
 export default function Navigation() {
 
 	const [isLoggedIn, toggleIsLoggedIn] = useState(() => false);
+	
+	const [userUuid, setUserUuid] = useState('')
 
 	useEffect( () => {
 		const token = checkForAccessToken();
-
-
+		getUserUuid() ;
+		
 	}, [])
+
+	const getUserUuid = async() => {
+		setUserUuid(await SecureStore.getItemAsync('uuid'));
+	}
 
 	const checkForAccessToken = async () => {
 
@@ -55,6 +67,41 @@ export default function Navigation() {
 
 		await SecureStore.deleteItemAsync('accessToken');
 		toggleIsLoggedIn(false);
+	}
+
+	const MessagesHome = () => {
+		return (
+			<MessagesStack.Navigator>
+				<MessagesStack.Screen 
+					name={'MessagesList'}
+					component={Messages}
+					options={({ route }) => {
+						return {
+							headerTitle: () => {
+								return (
+									<MessagesHeader route={route}/>
+								)
+							},
+						}
+					}}
+				/>
+				<MessagesStack.Screen 
+					name={'Chat'}
+					component={Chat}
+					options={({ route }) => {
+						return {
+							headerTitle: () => {
+
+
+								return (
+									<ChatHeader route={route}/>
+								)
+							}
+						}
+					}}
+				/>
+			</MessagesStack.Navigator>
+		)
 	}
 	
 	const screenHeader = (name) => {
@@ -77,8 +124,16 @@ export default function Navigation() {
 			<Tab.Navigator
 				screenOptions={({ route }) => ({
 					tabBarHideOnKeyboard: true,
-					tabBarIcon: ({ focused, color, size }) => {
+					tabBarIcon: ({ focused, size }) => {
 					let iconName;
+					let color;
+
+					if (focused) {
+						color = '#f43f5e'
+					} else {
+						color ='#27272a'
+					}
+
 		
 					switch (route.name) {
 						case 'Profile':
@@ -101,10 +156,9 @@ export default function Navigation() {
 					}
 		
 					// You can return any component that you like here!
-					return <Ionicons name={iconName} size={size} />;
+					return <Ionicons name={iconName} size={size} color={color} />;
 					},
-					tabBarActiveTintColor: 'tomato',
-					tabBarInactiveTintColor: 'gray',
+					tabBarShowLabel:false
 				})}
 			>
 				<Tab.Screen 
@@ -139,16 +193,9 @@ export default function Navigation() {
 				/>
 				<Tab.Screen 
 					name="Messages" 
-					component={Messages} 
+					component={MessagesHome} 
 					options={({ navigation, route }) => ({ 
-						headerTitle: () => screenHeader('Messages'),
-						// headerRight: () => (
-						// 	<Button
-						// 		onPress={() => logOut()}
-						// 	>
-						// 		Log out
-						// 	</Button>
-						// ),
+						headerShown: false
 					})}
 				/>
 				<Tab.Screen 

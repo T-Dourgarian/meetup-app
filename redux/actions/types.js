@@ -1,0 +1,6 @@
+export const ADD_MESSAGE = 'ADD_MESSAGE';
+export const SET_CHATS = 'SET_CHATS';
+export const ADD_CHAT_TO_DELETE = 'ADD_CHAT_TO_DELETE';
+export const TOGGLE_DELETE_MODE = 'TOGGLE_DELETE_MODE';
+export const REMOVE_CHAT_TO_DELETE = 'REMOVE_CHAT_TO_DELETE';
+export const DELETE_CHAT = 'DELETE_CHAT'; 

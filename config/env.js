@@ -5,6 +5,4 @@ const env = {
 	 AUTOCOMPLETE_KEY
 }
 
-
-
 export default env;

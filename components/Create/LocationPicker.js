@@ -84,6 +84,7 @@ function LocationPicker({ setModal, setLocation }) {
 									borderWidth: 2
 								},
 							}}
+							onFail={error => console.log(error)}
 							
 						/>
 					
