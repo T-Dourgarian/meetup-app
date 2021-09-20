@@ -18,11 +18,10 @@ const ChatHeader = ({ route }) => {
 	const [event] = useState(route.params.event[0]);
 	const [confirmDialog, setConfirmDialog] = useState(false);
 	const [userUuid, setUserUuid] = useState('')
-	const deleteMode = useSelector((state) => state.chats.deleteMode)
+	const [accepted, setAccepted] = useState(false);
 
 	useEffect( () => {
 		getUserUuid();
-		
 	}, [])
 
 	const getUserUuid = async() => {
@@ -42,7 +41,18 @@ const ChatHeader = ({ route }) => {
 	return (
 		<Flex direction='column' w='100%' ml='-10%' >
 			
-			<Text fontSize={17} bold>{ user.firstName } { user.lastName } </Text>
+			<Flex direction='row' justift='center' align='center'>
+				<Text fontSize={17} bold>{ user.firstName } { user.lastName } </Text>
+				<Spacer />
+				{
+					(event.acceptedUuids.includes(userUuid) || accepted) &&
+					<Text 
+						fontSize={12} 
+						color='#fb7185'
+
+					> Attendance Confirmed </Text>
+				}
+			</Flex>
 			
 			<Flex direction='row' w={'100%'}>
 				<Text fonstSize={15}>{ event.name } </Text>
@@ -54,7 +64,7 @@ const ChatHeader = ({ route }) => {
 			<Text mb={2} color='#a1a1aa' fontSize={14} numberOfLines={1}>{ event.location } </Text>
 
 			{
-				!(event.acceptedUuids.includes(userUuid) || event.deleted) &&
+				!(event.acceptedUuids.includes(userUuid) || accepted || event.deleted || event.createdBy.uuid === userUuid) &&
 				<Button
 					backgroundColor='#fb7185'
 					variant='unstyled'
@@ -70,7 +80,7 @@ const ChatHeader = ({ route }) => {
 				</Button>
 			}
 
-			<ConfirmAttendance isOpen={confirmDialog} setIsOpen={setConfirmDialog} eventUuid={event.uuid} />
+			<ConfirmAttendance isOpen={confirmDialog} setIsOpen={setConfirmDialog} eventUuid={event.uuid} setAccepted={setAccepted}/>
 			
 		</Flex>
 	)

@@ -14,7 +14,7 @@ import { addMessage, setChats } from '../../redux/actions/chat';
 
 import socket from '../../config/socket';
 
-const ConfirmAttendance = ({ isOpen, setIsOpen, eventUuid }) => {
+const ConfirmAttendance = ({ isOpen, setIsOpen, eventUuid, setAccepted }) => {
 
 	const navigation = useNavigation()
 
@@ -40,6 +40,8 @@ const ConfirmAttendance = ({ isOpen, setIsOpen, eventUuid }) => {
 						'Authorization': `Bearer ${token}`
 					}
 				})
+
+				setAccepted(true);
 		
 
 				const { data } = await axios.get(`${env.API_URL}:3000/api/chat`,
@@ -54,11 +56,13 @@ const ConfirmAttendance = ({ isOpen, setIsOpen, eventUuid }) => {
 
 				navigation.navigate('MyEvents', { filter: 'attended' })
 
-				setSpinner(false)
-				setIsOpen(false);
+				if(mountedRef.current) {
+					setSpinner(false)
+					setIsOpen(false);
+				}
 
 		} catch(error) {
-			if (!mountedRef.current) {
+			if (mountedRef.current) {
 				setSpinner(false)
 				setIsOpen(false);
 			}

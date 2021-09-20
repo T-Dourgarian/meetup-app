@@ -42,7 +42,7 @@ const MessagesHeader = ({ route }) => {
 			
 			{
 				!deleteMode ? 
-				<Text my={'auto'}>Messages</Text>:
+				<Text my={'auto'} color='#fb7185' fontSize={'xl'} bold >Messages</Text>:
 				<Button 
 					variant='unstyled'
 					onPress={() => dispatch(toggleDeleteMode(false))}

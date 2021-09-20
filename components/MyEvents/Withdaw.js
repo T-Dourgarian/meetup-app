@@ -12,34 +12,32 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import socket from '../../config/socket';
 
 
-const DeleteEvent = ({ isOpen, setIsOpen, event, fetchMyEventsData })  => {
+const Withdraw = ({ setIsOpen, event, fetchMyEventsData })  => {
 
 	const [spinner, setSpinner] = useState(false);
 
-	useEffect(() => {
-		console.log(fetchMyEventsData);
-	}, [])
+	// useEffect(() => {
+		// console.log(fetchMyEventsData);
+	// }, [])
 
-	const handleDelete = async () => {
+	const handleWithdraw = async () => {
 		try {
 
 			setSpinner(true);
 
 			const token = await SecureStore.getItemAsync('accessToken');
 			
-			await axios.delete(`${env.API_URL}:3000/api/myevents/delete/${event.uuid}`,
+			await axios.put(`${env.API_URL}:3000/api/myevents/withdraw/${event.uuid}`,{},
 			{
 				headers: {
 					'Authorization': `Bearer ${token}`
 				}
 			});
-
 			
 			setSpinner(false);
 			setIsOpen(false);
-			
-			fetchMyEventsData();
 
+			fetchMyEventsData();
 
 		} catch(error) {
 			console.log(error);
@@ -51,29 +49,29 @@ const DeleteEvent = ({ isOpen, setIsOpen, event, fetchMyEventsData })  => {
 			<Modal.Content>
 			<Modal.Header>
 				<Text fontSize={20} bold color='#fb7185'>
-					Delete Event
+					Withdraw Attendance
 				</Text>
 			</Modal.Header>
 			<Modal.Body>
-				Please confirm that you want to delete this event.
+				Please confirm that you want to withdraw your attendance from this event.
 				<Flex my={2} direction='column'>
 					<Text>{event.name}</Text>
 					<Text>{dateFormat(event.date, 'h:MM TT - m/dd')}</Text>
 					<Text>{event.location}</Text>
 				</Flex> 
-				Once the event is deleted, it is gone forever and all chats tied to this event will be deleted.
+				Once you have withdrawn, the event will be removed and your chat will be deleted.
 			</Modal.Body>
 			<Modal.Footer>
 				<Button
 					color='#fff'
 					backgroundColor='#fb7185'
 					mr={2}
-					onPress={() => handleDelete()}
+					onPress={() => handleWithdraw()}
 				>
 					{
 						spinner ? 
 						<Spinner />:
-						<Text color='#fff' bold>Delete</Text>
+						<Text color='#fff' bold>Withdraw</Text>
 					}
 				</Button>
 				<Button
@@ -92,4 +90,4 @@ const DeleteEvent = ({ isOpen, setIsOpen, event, fetchMyEventsData })  => {
 	)
 }	
 
-export default DeleteEvent;
+export default Withdraw;

@@ -8,6 +8,7 @@ import axios from 'axios';
 import dateFormat from 'dateformat'
 import GoogleStaticMap from 'react-native-google-static-map'
 import DeleteEvent from '../MyEvents/DeleteEvent';
+import Withdraw from '../MyEvents/Withdaw';
 
 import env from "../../config/env";
 
@@ -18,6 +19,7 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 	const [hidden, setHidden] = useState(event.hidden);
 	const [deleted, setDeleted] = useState(event.deleted);
 	const [deleteModal, setDeleteModal] = useState(false);
+	const [withdrawModal, setWithdrawModal] = useState(false);
 
 	useEffect(() => {
 		setCurrentUser();
@@ -49,7 +51,7 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 				}
 			)
 
-			navigation.navigate('Messages', {
+			navigation.navigate('MessagesList', {
 				chatUuid: data.chat.uuid
 			})
 
@@ -183,18 +185,7 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 						<Spacer />
 
 						{
-							new Date(event.date) > new Date() ?
-							<Box 
-								backgroundColor='#16a34a'
-								px={2}
-								pb={1}
-								borderRadius={20}
-							>
-								<Text 
-									color='#fff' 
-									fontWeight='bold'
-								>Active</Text>
-							</Box>:
+							!(new Date(event.date) > new Date()) &&
 							<Box 
 								backgroundColor='#991b1b'
 								px={2}
@@ -212,11 +203,11 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 				
 			</Flex>	
 			<Flex
-				mx={2}
+				// mx={2}
 				px={2}
 				py={2}
 				backgroundColor='#fb7185'
-				borderRadius={10}
+				// borderRadius={10}
 			>
 				<Flex 
 					direction='row'
@@ -281,7 +272,7 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 							w={'100%'}
 							borderRadius={20}
 							shadow={4}
-							isDisabled={event.createdBy.uuid === currentUserUuid }
+							isDisabled={event.createdBy.uuid === currentUserUuid  }
 							onPress={() => handleSendMessage()}
 						>
 							<Text
@@ -296,36 +287,18 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 							<Button
 								backgroundColor='#fff'
 								h={8}
-								w={'48%'}
+								w={'100%'}
 								borderRadius={20}
 								shadow={4}
 								isDisabled={event.createdBy.uuid === currentUserUuid }
-								onPress={() => handleSendMessage()}
+								onPress={() => setWithdrawModal(true)}
 							>
 								<Text
 									color='#fb7185'
 									bold
-									onPress={() => handleSendMessage()}
 									fontSize={15}
 								>
 									Withdraw attendance
-								</Text>
-							</Button>
-							<Spacer />
-							<Button
-								backgroundColor='#fff'
-								h={8}
-								w={'48%'}
-								borderRadius={20}
-								shadow={4}
-								isDisabled={event.createdBy.uuid === currentUserUuid }
-								onPress={() => handleSendMessage()}
-							>
-								<Text
-									color='#fb7185'
-									bold
-								>
-									Go to messages
 								</Text>
 							</Button>
 						</Flex>
@@ -403,7 +376,12 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 
 			{
 				deleteModal &&
-				<DeleteEvent setIsOpen={setDeleteModal} isOpen={deleteModal} event={event} setDeleted={setDeleted} fetchMyEventsData={fetchMyEventsData}/>
+				<DeleteEvent setIsOpen={setDeleteModal} event={event} setDeleted={setDeleted} fetchMyEventsData={fetchMyEventsData}/>
+			}
+
+			{
+				withdrawModal &&
+				<Withdraw setIsOpen={setWithdrawModal} event={event} fetchMyEventsData={fetchMyEventsData} />
 			}
 		</Flex>
 	)

@@ -64,14 +64,11 @@ const MyEvents = ({ navigation, route }) => {
 		}
 	};
 
-	useEffect(() => {
-		fetchData(filter);
-	}, [filter])
-
 
 	useEffect(() => {
 		if (route.params && route.params.filter) {
 			setFilter(route.params.filter);
+			fetchData(route.params.filter);
 		}
 	}, [route.params])
 

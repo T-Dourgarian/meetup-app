@@ -50,11 +50,19 @@ const chatReducer = (state = initialState, action) => {
 			}
 		case REMOVE_CHAT_TO_DELETE:
 
-			const newChatsTDelete = state.chatsToDelete.filter(uuid => uuid !== action.data);
+			const newChatsToDelete = state.chatsToDelete.filter(uuid => uuid !== action.data);
 
-			return {
-				...state,
-				chatsToDelete: [...newChatsTDelete]
+			if (!newChatsToDelete.length) {
+				return {
+					...state,
+					deleteMode: false,
+					chatsToDelete: [...newChatsToDelete]
+				}
+			} else {
+				return {
+					...state,
+					chatsToDelete: [...newChatsToDelete]
+				}
 			}
 		case TOGGLE_DELETE_MODE:
 			if(!action.data) {

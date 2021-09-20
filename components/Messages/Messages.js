@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState, useRef, useReducer } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View, RefreshControl } from 'react-native';
 import axios from 'axios';
 import { List, Box, Button, Input, ScrollView, Stack, Avatar, Center, Flex, Text, Image, Modal, Spinner, PresenceTransition, Spacer, Divider } from 'native-base';
 import * as SecureStore from 'expo-secure-store';
@@ -19,7 +19,7 @@ import chatReducer from '../../redux/reducers/chatReducer';
 
 import socket from '../../config/socket';
 
-const Messages = ({ navigation, route }, props) => {
+const Messages = ({ navigation, route }) => {
 
 	const [userUuid, setUserUuid] = useState('');
 	const [closeChatDialog, setCloseChatDialog] = useState(false);
@@ -28,6 +28,22 @@ const Messages = ({ navigation, route }, props) => {
 	const deleteMode = useSelector((state) => state.chats.deleteMode);
 	const chatsToDelete = useSelector((state) => state.chats.chatsToDelete);
 	const dispatch = useDispatch();
+
+
+	const [refreshing, setRefreshing] = useState(false);
+
+	const onRefresh = React.useCallback(() => {
+		setRefreshing(true);
+		wait(200).then(() => {
+			setRefreshing(false);
+			fetchChats(); 
+		});
+	}, []);
+
+	const wait = (timeout) => {
+		return new Promise(resolve => setTimeout(resolve, timeout));
+	}
+	
 
 
 
@@ -118,8 +134,8 @@ const Messages = ({ navigation, route }, props) => {
 						uri: `${env.API_URL}:3000${user.ppURL}`,
 					}}
 					borderRadius={80}
-					w={'60px'}
-					h={'60px'}
+					w={'50px'}
+					h={'50px'}
 					alt="profile picture"
 					borderColor='#fb7185'
 				>
@@ -129,8 +145,8 @@ const Messages = ({ navigation, route }, props) => {
 		} else {
 			return (
 				<Box
-					w={'60px'}
-					h={'60px'}
+					w={'50px'}
+					h={'50px'}
 					borderRadius={80}
 					backgroundColor='#fff'
 					mr={2}
@@ -194,8 +210,12 @@ const Messages = ({ navigation, route }, props) => {
 								h={'100%'}
 								backgroundColor='#fff'
 								w={'100%'}
-								// borderBottomColor='#fff'
-								// borderBottomWidth={2}
+								refreshControl={
+									<RefreshControl
+										refreshing={refreshing}
+										onRefresh={onRefresh}
+									/>
+								}
 							>
 								<Flex direction='column' h={'100%'}>
 									{
@@ -205,6 +225,7 @@ const Messages = ({ navigation, route }, props) => {
 													onPress={() =>  selectChat(chat)}  
 													onLongPress={() => handleStartDeleteMode(chat)}
 													delayLongPress={1000}
+													height={'20%'}
 											   >
 													<Box
 														variant='unstyled'
@@ -242,6 +263,22 @@ const Messages = ({ navigation, route }, props) => {
 																	>
 																		{moment(chat.messages[chat.messages.length-1].createdAt).fromNow()}
 																	</Text>
+																}
+																<Spacer />
+
+																{
+																	chat.event[0].createdBy.uuid === userUuid &&
+																	<Box
+																		borderColor='#fb7185'
+																		borderWidth={1}
+																		borderRadius={20}
+																		width={'50%'}
+																		ml='auto'
+																		mr={2}
+
+																	>
+																		<Text textAlign={'center'} numberOfLines={1} color='#fb7185' fontSize={11}>Your Event</Text>
+																	</Box>
 																}
 															</Flex>
 

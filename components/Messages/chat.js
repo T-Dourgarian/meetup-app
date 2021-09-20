@@ -99,13 +99,13 @@ const Chat = ({ route }) => {
 
 	return (
 		<Box h={'100%'} backgroundColor='#fff'>
-			<Center>
-				<Text fontSize={12} color='#a8a29e' w={'60%'} textAlign='center' pt={1} pb={3}> This is the beginning of your conversation with {otherChatUser.firstName} {otherChatUser.lastName} </Text>
-			</Center>
 			<ScrollView h={10}
 				ref={scrollViewRef}
 				onContentSizeChange={(width,height) => scrollViewRef.current.scrollTo({y:height})}
 			>
+				<Center>
+					<Text fontSize={12} color='#a8a29e' w={'60%'} textAlign='center' pt={1} pb={3}> This is the beginning of your conversation with {otherChatUser.firstName} {otherChatUser.lastName} </Text>
+				</Center>
 				{
 					messages && messages[0] &&
 					messages.map(message => {
@@ -176,19 +176,29 @@ const Chat = ({ route }) => {
 
 				}
 			</ScrollView>
-			<Input 
-				placeholder='Message'
-				value={text}
-				onSubmitEditing={() => sendMessage()}
-				onChangeText={(text) => setText(text)}
-				mx={2}
-				mb={2}
-				mt={2}
-				h={10}
-				borderWidth={0}
-				backgroundColor={'#f5f5f4'}
-				borderRadius={30}
-			/>
+			{
+				!route.params.event[0].deleted ? 
+				<Input 
+					placeholder='Message'
+					value={text}
+					onSubmitEditing={() => sendMessage()}
+					onChangeText={(text) => setText(text)}
+					mx={2}
+					mb={2}
+					mt={2}
+					h={10}
+					borderWidth={0}
+					backgroundColor={'#f5f5f4'}
+					borderRadius={30}
+				/>:
+				<Center
+					h={10}
+				>
+					<Text color={'#fb7185'}>
+						This event has been deleted by the owner.
+					</Text>
+				</Center>
+			}
 		</Box>
 	)
 };

@@ -22,20 +22,14 @@ function Event({ navigation }) {
 	const [search, setSearch] = useState(() => '')
 	const [spinner, setSpinner] = useState(false);
 	const [refreshing, setRefreshing] = useState(false)
-	const [unmounted, setUnmounted] = useState(false);
 
 	const mountedRef = useRef(true);
-
-	useEffect(() => {
-		return () => { 
-		  mountedRef.current = false
-		}
-	}, [])
 
 	const onRefresh = React.useCallback(() => {
 		setRefreshing(true);
 		wait(200).then(() => {
 			setRefreshing(false);
+			fetchData();
 		});
 	  }, []);
 	
@@ -46,7 +40,10 @@ function Event({ navigation }) {
 
 	async function fetchData() {
 		try {
-			setSpinner(true)
+
+			if(mountedRef.current) {
+				setSpinner(true);
+			}
 			const token = await SecureStore.getItemAsync('accessToken');
 
 			const { data } = await axios.get(`${env.API_URL}:3000/api/event`,
@@ -62,9 +59,7 @@ function Event({ navigation }) {
 
 			if (mountedRef.current) {
 				setSpinner(false)
-				
 				setEvents(data.events);
-
 			}
 		} catch(error) {
 			console.log(error)
@@ -72,11 +67,14 @@ function Event({ navigation }) {
 	}
 
 	useEffect( () => {
-		 
+
+		mountedRef.current = true;
 		fetchData();
+		
 		return () => {
 			setEvents([]);
-			setUnmounted(true);
+			setSpinner(false);
+			mountedRef.current = false
 		}
 	}, [])
 
@@ -95,7 +93,7 @@ function Event({ navigation }) {
 						refreshing={refreshing}
 						onRefresh={onRefresh}
 					/>
-			}
+				}
 			>
 				<Box>
 					<Input 
