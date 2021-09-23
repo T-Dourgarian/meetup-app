@@ -9,6 +9,7 @@ import dateFormat from 'dateformat'
 import GoogleStaticMap from 'react-native-google-static-map'
 import DeleteEvent from '../MyEvents/DeleteEvent';
 import Withdraw from '../MyEvents/Withdaw';
+import SeeAttending from './SeeAttending';
 
 import env from "../../config/env";
 
@@ -20,6 +21,9 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 	const [deleted, setDeleted] = useState(event.deleted);
 	const [deleteModal, setDeleteModal] = useState(false);
 	const [withdrawModal, setWithdrawModal] = useState(false);
+	const [editModal, setEditModal] = useState(false);
+	const [attendingModal, setAttendingModal] = useState(false);
+	
 
 	useEffect(() => {
 		setCurrentUser();
@@ -34,6 +38,14 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 		setCurrentUserUuid(uuid)
 	}
 
+	const handleEditEvent = () => {
+		navigation.navigate('MyEvents', 
+			{ 
+				screen: 'EditEvent',
+				params: { event }
+			}
+		)
+	}
 
 	const handleSendMessage = async () => {
 		try {
@@ -81,16 +93,6 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 		}
 	}
 
-	const editEvent = async () => {
-		try {
-
-		} catch(error){
-			console.log(error)
-		}
-	}
-
-
-
 	return (
 		<Flex key={event.uuid} >
 			<Flex 
@@ -100,59 +102,70 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 			>
 				{
 					event.createdBy.ppURL ?
-					<Image
-						source={{
-							uri: `${env.API_URL}:3000${event.createdBy.ppURL}`,
-						}}
-						w={'60px'}
-						h={'60px'}
-						borderRadius={100}
-						alt="profile picture"
-					>
-						
-					</Image>:
-					<Box
-						borderRadius={100}
-						w={'60px'}
-						h={'60px'}
-					>
-						<Ionicons 
-							size={50}
-							name='person-outline'
-						/>
+					<Box w='15%'>
+						<Image
+							source={{
+								uri: `${env.API_URL}:3000${event.createdBy.ppURL}`,
+							}}
+							w={'60px'}
+							h={'60px'}
+							borderRadius={100}
+							alt="profile picture"
+						></Image>
+					</Box>
+						:
+					<Box w={'15%'}>
+						<Box
+							borderRadius={100}
+							w={'60px'}
+							h={'60px'}
+						>
+							<Ionicons 
+								size={60}
+								name='person-circle-outline'
+							/>
+						</Box>
 					</Box>
 				}
 				
 				<Box
-				
+					w='85%'
 					ml={2}
 				>
 					<Flex
 						direction={'row'}
-						w={'100%'}
+						justify='space-between'
+						pr={2}
 					>
-						<Center>
-							<Text  
-								mr={12}
-								color='#27272a'
+						
+						<Text  
+							color='#27272a'
+							fontWeight='bold'
+						>{event.createdBy.firstName} {event.createdBy.lastName}</Text>
+						
+						{
+							!(new Date(event.date) > new Date()) ?
+							<Text 
+								my={'auto'}
+								color='#991b1b' 
 								fontWeight='bold'
-							>{event.createdBy.firstName} {event.createdBy.lastName}</Text>
-						</Center>
-						<Center ml={9}>
-							<Flex direction='row'>
-								<Box 
-									ml={2}
-								>
-									<Text
-										fontSize={12}
-										color='#27272a'
-										bold
-									>{dateFormat(event.date, 'h:MM TT - m/dd')}</Text>
-								</Box>
-							</Flex>
-						</Center>
+								fontSize={13}
+							>Expired</Text>:
+							<Spacer />
+
+						}
+
+						
+						<Text
+							fontSize={14}
+							color='#27272a'
+							bold
+							my={'auto'}
+						>{dateFormat(event.date, 'h:MM TT - m/dd')}</Text>
+							
+
 					</Flex>
-					<Flex direction='row' mt={2}>
+					<Flex direction='row' mt={2} pr={2}>
 						<Box 
 							backgroundColor='#fb7185'
 							px={2}
@@ -162,6 +175,7 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 							<Text 
 								color='#fff' 
 								fontWeight='bold'
+								my='auto'
 							>{event.name}</Text>
 						</Box>
 						{
@@ -184,20 +198,18 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 						}
 						<Spacer />
 
-						{
-							!(new Date(event.date) > new Date()) &&
-							<Box 
-								backgroundColor='#991b1b'
-								px={2}
-								pb={1}
-								borderRadius={20}
-							>
-								<Text 
-									color='#fff' 
-									fontWeight='bold'
-								>Expired</Text>
-							</Box>
-						}
+
+						<Button
+							variant='outline'
+							onPress={() => setAttendingModal(true)}
+							size='xs'
+							borderColor='#fb7185'
+						>
+							<Text
+								fontSize={14}
+								color='#fb7185'
+							>See who's going</Text>
+						</Button>
 					</Flex>
 				</Box>
 				
@@ -212,7 +224,7 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 				<Flex 
 					direction='row'
 				>
-					<Box>
+					<Box >
 						<Text 
 							fontSize={14} 
 							bold
@@ -221,11 +233,11 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 							Description
 						</Text>
 						<Text color='#fff' fontSize={12}>
-							{event.description}
+							{ event.description }
 						</Text>
 					</Box>
 					<Spacer />
-					<Box>
+					<Box px={1}>
 						<Text
 							color="#fff"
 							bold
@@ -238,7 +250,7 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 							bold
 							fontSize={13}
 						>
-							{event.currentlyMessaging.length} currently messaging
+							{event.currentlyMessaging.length} chatting
 						</Text>
 					</Box>
 				</Flex>
@@ -266,20 +278,24 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 					</Box>
 					{
 						discoverScreen &&
-						<Button
-							backgroundColor='#fff'
-							h={8}
-							w={'100%'}
-							borderRadius={20}
-							shadow={4}
-							isDisabled={event.createdBy.uuid === currentUserUuid  }
-							onPress={() => handleSendMessage()}
-						>
-							<Text
-								color='#fb7185'
-								bold
-							>Send { event.createdBy.firstName } a message.</Text>
-						</Button>
+					
+						<Flex direction='column'>
+							<Button
+								backgroundColor='#fff'
+								h={8}
+								w={'100%'}
+								borderRadius={20}
+								shadow={4}
+								isDisabled={event.createdBy.uuid === currentUserUuid  }
+								onPress={() => handleSendMessage()}
+							>
+								<Text
+									color='#fb7185'
+									bold
+								>Send { event.createdBy.firstName } a message.</Text>
+							</Button>
+						</Flex>
+						
 					}
 					{
 						myEventsScreen === 'attended' &&
@@ -357,7 +373,7 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 								w={'32%'}
 								borderRadius={20}
 								shadow={4}
-								onPress={() => editEvent()}
+								onPress={() => handleEditEvent()}
 							>
 								<Text
 									color='#fb7185'
@@ -382,6 +398,11 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 			{
 				withdrawModal &&
 				<Withdraw setIsOpen={setWithdrawModal} event={event} fetchMyEventsData={fetchMyEventsData} />
+			}
+
+			{
+				attendingModal && 
+				<SeeAttending setIsOpen={setAttendingModal} event={event}/>
 			}
 		</Flex>
 	)

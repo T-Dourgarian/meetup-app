@@ -19,8 +19,9 @@ import MyEvents from './MyEvents/MyEvents';
 import Chat from './Messages/Chat';
 import ChatHeader from './Messages/ChatHeader';
 import MessagesHeader from './Messages/MessagesHeader';
-
 import CreateEvent from './Create/CreateEvent';
+import EditEvent from './MyEvents/EditEvent';
+
 
 import socket from '../config/socket';
 
@@ -28,6 +29,7 @@ const Stack = createNativeStackNavigator();
 
 const MessagesStack = createNativeStackNavigator();
 
+const MyEventsStack = createNativeStackNavigator();
 
 
 const Tab = createBottomTabNavigator();
@@ -103,6 +105,41 @@ export default function Navigation() {
 			</MessagesStack.Navigator>
 		)
 	}
+
+	const MyEventsHome = () => {
+		return (
+			<MyEventsStack.Navigator>
+				<MyEventsStack.Screen 
+					name={'MyEventsList'}
+					component={MyEvents}
+					options={({ navigation, route }) => ({ 
+						headerTitle: () => screenHeader('My Events'),
+						// headerRight: () => (
+						// 	<Button
+						// 		onPress={() => logOut()}
+						// 	>
+						// 		Log out
+						// 	</Button>
+						// ),
+					})}
+				/>
+				<MyEventsStack.Screen 
+					name={'EditEvent'}
+					component={EditEvent}
+					options={({ navigation, route }) => ({ 
+						headerTitle: () => screenHeader('Edit Event'),
+						// headerRight: () => (
+						// 	<Button
+						// 		onPress={() => logOut()}
+						// 	>
+						// 		Log out
+						// 	</Button>
+						// ),
+					})}
+				/>
+			</MyEventsStack.Navigator>
+		)
+	}
 	
 	const screenHeader = (name) => {
 
@@ -128,31 +165,34 @@ export default function Navigation() {
 					let iconName;
 					let color;
 
-					if (focused) {
-						color = '#f43f5e'
-					} else {
-						color ='#27272a'
-					}
-
 		
 					switch (route.name) {
 						case 'Profile':
-							iconName = 'person'
+							iconName = 'person-outline'
 						  	break;
 						case 'Create':
-							iconName='add-outline'
+							iconName='add-circle-outline'
 							break;
 						case 'Discover':
-							iconName = 'search'
+							iconName = 'search-outline'
 						  	break;
 						case 'Messages':
-							iconName = 'chatbox'
+							iconName = 'chatbox-outline'
 							break;
 						case 'MyEvents':
-							iconName = 'list'
+							iconName = 'list-outline'
 							break;
 						default:
-							iconName = 'person'
+							iconName = 'person-outline'
+					}
+
+
+					if (focused) {
+						color = '#f43f5e'
+
+						iconName = iconName.split('-outline')[0]
+					} else {
+						color ='#27272a'
 					}
 		
 					// You can return any component that you like here!
@@ -172,16 +212,9 @@ export default function Navigation() {
 				/>
 				<Tab.Screen 
 					name="MyEvents" 
-					component={MyEvents} 
+					component={MyEventsHome} 
 					options={({ navigation, route }) => ({ 
-						headerTitle: () => screenHeader('My Events'),
-						// headerRight: () => (
-						// 	<Button
-						// 		onPress={() => logOut()}
-						// 	>
-						// 		Log out
-						// 	</Button>
-						// ),
+						headerShown: false
 					})}
 				/>
 				<Tab.Screen 

@@ -6,31 +6,22 @@ import { List, Box, Text, Input, Button, Modal, Stack, Center, TextArea, ScrollV
 import * as SecureStore from 'expo-secure-store';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import dateFormat from 'dateformat'
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
 import LocationPicker from './LocationPicker';
 import env from '../../config/env';
 
 
-function createEvent({ navigation }) {
+function CreateEvent({ navigation, event }) {
 
-	const [name, setName] = useState(() => '')
-	const [description, setDescription] = useState(() => '')
-	const [location, setLocation] = useState(() => '')
-	
+	const [name, setName] = useState(() => event ? event.name: '')
+	const [description, setDescription] = useState(() => event ? event.description : '')
+	const [location, setLocation] = useState(() => event ? event.location : '')
+	const [date, setDate] = useState(event ? new Date(event.date) : new Date());
 
-	useEffect(() => {
-		// console.log(event)
-	}, [])
-
-
-	const [date, setDate] = useState(new Date());
 	const [showDate, setShowDate] = useState(false);
 	const [showTime, setShowTime] = useState(false);
 	const [modal, setModal] = useState(false);
 	
-
-
 	const handleDateChange = (event, selectedDate) => {
 		if (event.type !== 'dismissed') {
 			setShowDate(false);
@@ -87,6 +78,38 @@ function createEvent({ navigation }) {
 			console.log(error)
 		}
 	}
+
+	const handleSaveChanges = async () => {	
+		try {
+
+			if (name && description && location) {
+				const token = await SecureStore.getItemAsync('accessToken');
+
+				console.log(date);
+
+				await axios.put(`${env.API_URL}:3000/api/event/update`,
+					{
+						uuid: event.uuid,
+						name,
+						date,
+						description,
+						location
+					},
+					{
+						headers: {
+							'Authorization': `Bearer ${token}`
+						}
+					}
+				);
+
+
+
+
+			}
+		} catch(error) {
+			console.log(error)
+		}
+	}
   
   
 
@@ -96,7 +119,7 @@ function createEvent({ navigation }) {
 				<Box mb={5}>
 					<Box mb={1} ml={3}>
 						<Text 
-							fontSize={22} 
+							fontSize={18} 
 							bold 
 							color={'#fb7185'}
 						> Activity </Text>
@@ -108,9 +131,10 @@ function createEvent({ navigation }) {
 						bordered
 						onChangeText={(text) => setName(text)}
 						placeholder="What activity do you want to do?"
-						borderRadius={30}
+						borderRadius={8}
 						borderColor={'#fecdd3'}
 						borderWidth={2}
+						py={2}
 						_focus={
 							{
 								style: {
@@ -123,7 +147,7 @@ function createEvent({ navigation }) {
 
 				<Box mb={5}>
 					<Text 
-						fontSize={22} 
+						fontSize={18} 
 						bold 
 						w={'100%'}
 						color={'#fb7185'}
@@ -134,11 +158,11 @@ function createEvent({ navigation }) {
 						variant="outline"
 						space={4}
 						value={description}
-						placeholder="Any necessary details or desciptions of the activity." 
+						placeholder="Any needed details or desciptions of the activity or location." 
 						onChangeText={(text) => setDescription(text)}
 						textAlignVertical='top'
 						borderColor={'#fecdd3'}
-						borderRadius={12}
+						borderRadius={8}
 						borderWidth={2}
 						_focus={
 							{
@@ -152,7 +176,7 @@ function createEvent({ navigation }) {
 
 				<Box>
 					<Text 
-						fontSize={22} 
+						fontSize={18} 
 						bold 
 						w={'100%'}
 						color={'#fb7185'}
@@ -166,7 +190,8 @@ function createEvent({ navigation }) {
 						backgroundColor={'#fff'}
 						borderWidth={2}
 						borderColor={'#fecdd3'}
-						borderRadius={30}
+						borderRadius={8}
+						py={2}
 						mb={5}
 					>
 						<Text color={'#fb7185'}>
@@ -177,7 +202,7 @@ function createEvent({ navigation }) {
 
 					<Box>
 						<Text 
-							fontSize={22} 
+							fontSize={18} 
 							bold 
 							w={'100%'}
 							color={'#fb7185'}
@@ -191,7 +216,7 @@ function createEvent({ navigation }) {
 							backgroundColor={'#fff'}
 							borderWidth={2}
 							borderColor={'#fecdd3'}
-							borderRadius={30}
+							borderRadius={8}
 						>
 							<Text color={'#fb7185'}>
 								{
@@ -232,20 +257,36 @@ function createEvent({ navigation }) {
 					)}
 				</Box>
 
-				<Center my={7}>
-					<Button
-						w={'70%'}
-						backgroundColor='#fb7185'
-						onPress={() => handleCreateEvent()}
-						py={2}
-					>
-						<Text bold color='white' fontSize={20}>Create</Text>
-					</Button>
-				</Center>
+				{
+					!event ? 
+					<Center my={8} >
+						<Button
+							w={'70%'}
+							my={'auto'}
+							shadow={5}
+							backgroundColor='#fb7185'
+							onPress={() => handleCreateEvent()}
+							py={2}
+						>
+							<Text bold color='white' fontSize={20}>Create</Text>
+						</Button>
+					</Center>:
+					<Center my={8} >
+						<Button
+							w={'70%'}
+							my={'auto'}
+							shadow={5}
+							backgroundColor='#fb7185'
+							onPress={() => handleSaveChanges()}
+							py={2}
+						>
+							<Text bold color='white' fontSize={20}>Save Changes</Text>
+						</Button>
+					</Center>
+				}
 			</Flex>
-			
 		</Box>
 	);
 }
 
-export default createEvent;
+export default CreateEvent;
