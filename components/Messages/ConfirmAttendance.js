@@ -54,7 +54,12 @@ const ConfirmAttendance = ({ isOpen, setIsOpen, eventUuid, setAccepted }) => {
 	
 				dispatch(setChats(data.chats));
 
-				navigation.navigate('MyEvents', { filter: 'attended' })
+				navigation.navigate('MyEvents', 
+					{ 
+						screen: 'MyEventsList',
+						params: { filter: 'attended' }
+					}
+				)
 
 				if(mountedRef.current) {
 					setSpinner(false)

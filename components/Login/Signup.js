@@ -32,6 +32,11 @@ function Signup({ toggleIsLoggedIn, navigation }) {
 
 				if (data.accessToken) {
 					SecureStore.setItemAsync(`accessToken`, data.accessToken)
+					SecureStore.setItemAsync(`uuid`, data.user.uuid);
+					SecureStore.setItemAsync(`firstName`, data.user.firstName);
+					SecureStore.setItemAsync(`lastName`, data.user.lastName);
+					SecureStore.setItemAsync(`ppURL`, '');
+
 					toggleIsLoggedIn(true);
 
 				} else {

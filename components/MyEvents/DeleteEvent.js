@@ -12,13 +12,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import socket from '../../config/socket';
 
 
-const DeleteEvent = ({ isOpen, setIsOpen, event, fetchMyEventsData })  => {
+const DeleteEvent = ({ setIsOpen, event, fetchMyEventsData })  => {
 
 	const [spinner, setSpinner] = useState(false);
-
-	useEffect(() => {
-		console.log(fetchMyEventsData);
-	}, [])
 
 	const handleDelete = async () => {
 		try {

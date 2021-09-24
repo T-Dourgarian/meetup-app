@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import axios from 'axios';
-import { List, Box, Button, Input, Flex, ScrollView, Text, Image, Center, Spinner, Spacer, TextArea } from 'native-base';
+import { List, Box, Button, Input, Flex, ScrollView, Text, Image, Center, Spinner, Spacer, TextArea, Select } from 'native-base';
 import * as SecureStore from 'expo-secure-store';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import io from 'socket.io-client';
@@ -21,11 +21,11 @@ const Profile = ({ navigation }) => {
 
 	const getUser = async () => {
 
-		const token = await SecureStore.getItemAsync('accessToken');
-
-		const uuid = await SecureStore.getItemAsync('uuid');
 		try {
+
+			const uuid = await SecureStore.getItemAsync('uuid');
 			const token = await SecureStore.getItemAsync('accessToken');
+			
 			const { data } = await axios.get(`${env.API_URL}:3000/api/user/${uuid}`,
 			{
 				headers: {
@@ -346,25 +346,20 @@ const Profile = ({ navigation }) => {
 							bold
 							color='#fb7185'
 						>Gender</Text>
-						<Input 
-							h={10}
+						<Select
+							selectedValue={user.gender}
+							// h={20}
 							w={'100%'}
-							variant="outline"
-							value={user.gender}
-							bordered
-							onChangeText={(text) => handleProfileChange(text, 'gender')}
 							borderRadius={8}
 							borderColor={'#fecdd3'}
 							borderWidth={1}
-							mt={1}
-							_focus={
-								{
-									style: {
-										borderColor: '#fb7185',
-									}
-								}
-							}
-						/>
+							py={2}
+							onValueChange={(value) => handleProfileChange(value, 'gender')}
+						>
+							<Select.Item label="Male" value="Male" />
+							<Select.Item label="Female" value="Female" />
+							<Select.Item label="Other" value="Other" />
+						</Select>
 					</Box>
 					<Box w='90%' margin='auto' mt={1}>
 						<Text

@@ -7,7 +7,8 @@
       "**/*"
     ],
     "plugins": [
-      "expo-image-picker"
+      "expo-image-picker",
+      "expo-location"
     ]
   },
   "name": "meetup"

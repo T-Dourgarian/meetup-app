@@ -14,29 +14,12 @@ import SeeAttending from './SeeAttending';
 import env from "../../config/env";
 
 
-const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchMyEventsData }) => {
+const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchMyEventsData, currentUserUuid }) => {
 
-	const [currentUserUuid, setCurrentUserUuid] = useState('');
 	const [hidden, setHidden] = useState(event.hidden);
-	const [deleted, setDeleted] = useState(event.deleted);
 	const [deleteModal, setDeleteModal] = useState(false);
 	const [withdrawModal, setWithdrawModal] = useState(false);
-	const [editModal, setEditModal] = useState(false);
 	const [attendingModal, setAttendingModal] = useState(false);
-	
-
-	useEffect(() => {
-		setCurrentUser();
-
-		return () => {
-			setCurrentUserUuid('');
-		};
-	},[])
-
-	const setCurrentUser = async () => {
-		const uuid =  await SecureStore.getItemAsync('uuid')
-		setCurrentUserUuid(uuid)
-	}
 
 	const handleEditEvent = () => {
 		navigation.navigate('MyEvents', 
@@ -392,7 +375,7 @@ const SingleEvent = ({ event, navigation, discoverScreen, myEventsScreen, fetchM
 
 			{
 				deleteModal &&
-				<DeleteEvent setIsOpen={setDeleteModal} event={event} setDeleted={setDeleted} fetchMyEventsData={fetchMyEventsData}/>
+				<DeleteEvent setIsOpen={setDeleteModal} event={event} fetchMyEventsData={fetchMyEventsData}/>
 			}
 
 			{

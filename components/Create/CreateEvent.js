@@ -85,8 +85,6 @@ function CreateEvent({ navigation, event }) {
 			if (name && description && location) {
 				const token = await SecureStore.getItemAsync('accessToken');
 
-				console.log(date);
-
 				await axios.put(`${env.API_URL}:3000/api/event/update`,
 					{
 						uuid: event.uuid,

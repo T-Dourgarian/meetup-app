@@ -26,23 +26,6 @@ const Chat = ({ route }) => {
 
 	const dispatch = useDispatch();
 
-
-	const [refreshing, setRefreshing] = useState(false);
-
-	const onRefresh = React.useCallback(() => {
-		setRefreshing(true);
-		wait(200).then(() => {
-			setRefreshing(false);
-			fetchChats(); 
-		});
-	}, []);
-
-	const wait = (timeout) => {
-		return new Promise(resolve => setTimeout(resolve, timeout));
-	}
-	
-
-
 	useEffect( () => {
 		setCurrentUser();
 	},[])
@@ -90,7 +73,6 @@ const Chat = ({ route }) => {
 	
 	const sendMessage = async () => {
 		const token = await SecureStore.getItemAsync('accessToken');
-		console.log('sendmessages')
 		socket.emit('sendMessage', { eventUuid, chatUuid, message: text, token })
 
 		setText('');

@@ -10,12 +10,22 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import configureStore from './redux/store';
 import { Provider } from 'react-redux';
 
+import * as Location from 'expo-location';
+
 const store = configureStore();
 
 
 
 
 export default function App() {
+
+	useEffect(() => {
+		(async () => {
+		  
+		  await Location.requestForegroundPermissionsAsync();
+
+		})();
+	  }, []);
 	
   return (
 	  <Provider store={store}>

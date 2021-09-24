@@ -10,7 +10,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import dateFormat from 'dateformat'
 
 // navigation component import
-import Discover from './Discover/Discover';
 import Login from './Login/Login';
 import Signup from './Login/Signup';
 import Messages from './Messages/Messages';
@@ -21,7 +20,7 @@ import ChatHeader from './Messages/ChatHeader';
 import MessagesHeader from './Messages/MessagesHeader';
 import CreateEvent from './Create/CreateEvent';
 import EditEvent from './MyEvents/EditEvent';
-
+import Events from './Discover/Events';
 
 import socket from '../config/socket';
 
@@ -203,7 +202,7 @@ export default function Navigation() {
 			>
 				<Tab.Screen 
 					name="Discover" 
-					component={Discover}
+					component={Events}
 					options={
 						{ 
 							headerTitle: () => screenHeader('Discover'),

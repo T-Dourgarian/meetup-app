@@ -18,6 +18,8 @@ const MyEvents = ({ navigation, route }) => {
 	const [events, setEvents] = useState([])
 	const [spinner, setSpinner] = useState(false);
 	const currentFilter = useRef(filter);
+	const [currentUserUuid, setCurrentUserUuid] = useState(null)
+	const [refreshing, setRefreshing] = useState(false);
 
 	useEffect(() => {
         // This effect executes on every render (no dependency array specified).
@@ -27,7 +29,11 @@ const MyEvents = ({ navigation, route }) => {
         currentFilter.current = filter;
     });
 
-	const [refreshing, setRefreshing] = React.useState(false);
+	const setCurrentUser = async () => {
+		const uuid =  await SecureStore.getItemAsync('uuid')
+		setCurrentUserUuid(uuid)
+	}
+
 
 	const onRefresh = React.useCallback(() => {
 	  setRefreshing(true);
@@ -65,6 +71,8 @@ const MyEvents = ({ navigation, route }) => {
 	};
 
 	useEffect(() => {
+		console.log('here')
+		setCurrentUser()
 		fetchData();
 	}, [])
 
@@ -133,7 +141,7 @@ const MyEvents = ({ navigation, route }) => {
 							{
 								events.map(event => 
 									(
-										<SingleEvent key={event.uuid} navigation={navigation} event={event} myEventsScreen={filter} fetchMyEventsData={fetchData}/>
+										<SingleEvent key={event.uuid} currentUserUuid={currentUserUuid} navigation={navigation} event={event} myEventsScreen={filter} fetchMyEventsData={fetchData}/>
 									)
 								)
 							}

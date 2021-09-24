@@ -45,9 +45,9 @@ const SeeAttending = ({ setIsOpen, event }) => {
 
 	return (
 		<Modal isOpen={true} size={'xl'} >
-			<Modal.Content w='80%' h={'80%'}>
-			<Modal.Body>
-				<ScrollView w='100%'>
+			<Modal.Content w='80%' h={'80%'} pl={4}>
+			<Modal.Body pr={4}>
+				<ScrollView w='100%' >
 					{
 						creator &&
 						<>
@@ -57,7 +57,7 @@ const SeeAttending = ({ setIsOpen, event }) => {
 								bold
 								mb={2}
 							>Event Creator</Text>
-							<Flex  direction='column' w='95%' mx='auto' my={2} px={3} py={3} backgroundColor='#fafafa' shadow={3}>
+							<Flex  direction='column' w='99%' mx='auto' my={2} px={3} py={3} backgroundColor='#fafafa' shadow={3}>
 								<Flex direction='row'>
 									{
 										creator.ppURL ? 
@@ -79,7 +79,7 @@ const SeeAttending = ({ setIsOpen, event }) => {
 										>
 											<Ionicons 
 												size={50}
-												name='person-outline'
+												name='person-circle-outline'
 											/>
 										</Box>
 									}
@@ -191,7 +191,7 @@ const SeeAttending = ({ setIsOpen, event }) => {
 										>
 											<Ionicons 
 												size={50}
-												name='person-outline'
+												name='person-circle-outline'
 											/>
 										</Box>
 									}

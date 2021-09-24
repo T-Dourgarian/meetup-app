@@ -17,41 +17,7 @@ import LocationPicker from '../Create/LocationPicker';
 
 
 const EditEvent = ({ route })  => {
-
-	const [spinner, setSpinner] = useState(false);
-
-	useEffect(() => {
-		console.log(route);
-	}, [])
-
-	const handleUpdate = async () => {
-		try {
-
-			setSpinner(true);
-
-			const token = await SecureStore.getItemAsync('accessToken');
-			
-			// await axios.delete(`${env.API_URL}:3000/api/myevents/delete/${event.uuid}`,
-			// {
-			// 	headers: {
-			// 		'Authorization': `Bearer ${token}`
-			// 	}
-			// });
-
-			
-			setSpinner(false);
-			setIsOpen(false);
-			
-			// fetchMyEventsData();
-
-
-		} catch(error) {
-			console.log(error);
-		}
-	}
-
 	return (
-		
 		<Box h='100%'>
 			<CreateEvent event={route.params.event} />
 		</Box>
